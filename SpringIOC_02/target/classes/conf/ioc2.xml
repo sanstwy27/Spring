@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+    <!-- 實驗4：正確的為各種屬性賦值
+         測試使用null值、
+         引用類型賦值（引用其他bean，引用內部bean）
+         集合類型賦值（List、Map、Properties）
+             util名稱空間創建集合類型的bean
+         級聯屬性賦值
+     -->
+    <bean id="car01" class="com.atsanstwy27.bean.Car">
+        <property name="carName" value="寶馬"></property>
+        <property name="color" value="綠色"></property>
+        <property name="price" value="30000"></property>
+    </bean>
+
+    <bean id="person01" class="com.atsanstwy27.bean.Person">
+        <!-- lastName="null" -->
+        <property name="lastName">
+            <!-- 進行複雜的賦值 -->
+            <null/>
+        </property>
+        <!--
+            ref，代表引用外面的一個值  ;引用其他bean
+        <property name="car" ref="car01"></property>
+        -->
+        <property name="car">
+            <!-- 對像我們可以使用bean標籤創建 相當於car=new Car();引用內部bean-->
+            <!-- 注意：內部bean寫id沒有用，獲取不到，只能內部使用 -->
+            <bean class="com.atsanstwy27.bean.Car">
+                <property name="carName" value="自行車"></property>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="book01" class="com.atsanstwy27.bean.Book">
+        <property name="bookName" value="東遊記"></property>
+    </bean>
+
+    <bean id="person02" class="com.atsanstwy27.bean.Person">
+        <!-- 如何為List對像賦值 -->
+        <property name="books">
+            <!-- 相當於books=new ArrayList<Book>(); -->
+            <list>
+                <!-- list標籤中添加每一個元素 -->
+                <bean class="com.atsanstwy27.bean.Book" p:bookName="西遊記"></bean>
+                <!-- 引用外部一個元素 -->
+                <ref bean="book01"/>
+            </list>
+        </property>
+
+        <property name="maps">
+            <!-- 相當於maps=new LinkedHashMap<>(); -->
+            <map>
+                <!-- 一個entry代表一個鍵值對 -->
+                <entry key="01" value="張三"></entry>
+                <entry key="02" value="18"></entry>
+                <entry key="03" value-ref="book01"></entry>
+                <entry key="04">
+                    <bean class="com.atsanstwy27.bean.Car">
+                        <property name="carName" value="奔馳"></property>
+                    </bean>
+                </entry>
+                <entry key="05">
+                    <value>李四</value>
+                </entry>
+            </map>
+        </property>
+
+        <property name="properties">
+            <!-- 相當於 properties=new Properties();所有的key和value都是string -->
+            <props>
+                <!-- k=v都是string，值直接寫在標籤體中 -->
+                <prop key="username">XXXXXX</prop>
+                <prop key="password">XXXXXX</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- util名稱空間創建集合類型的bean，方便別人引用	 -->
+    <bean id="person03" class="com.atsanstwy27.bean.Person">
+        <property name="maps" ref="myMap"></property>
+    </bean>
+    <!-- 相當於new LinkedHashMap<>() -->
+    <util:map id="myMap">
+        <!-- 添加元素 -->
+        <!-- 一個entry代表一個鍵值對 -->
+        <entry key="01" value="張三"></entry>
+        <entry key="02" value="18"></entry>
+        <entry key="03" value-ref="book01"></entry>
+        <entry key="04">
+            <bean class="com.atsanstwy27.bean.Car">
+                <property name="carName" value="奔馳"></property>
+            </bean>
+        </entry>
+        <entry key="05">
+            <value>李四</value>
+        </entry>
+    </util:map>
+
+    <!-- 解釋：myList有4個元素
+        [[],Person,12,{}]
+     -->
+    <util:list id="myList">
+        <list></list>
+        <bean class="com.atsanstwy27.bean.Person"></bean>
+        <value>12</value>
+        <ref bean="myMap"/>
+    </util:list>
+
+    <!-- 級聯屬性賦值，級聯屬性：屬性的屬性 -->
+    <bean id="person04" class="com.atsanstwy27.bean.Person">
+        <!-- 為car賦值的時候，順便改變car的價格 -->
+        <property name="car" ref="car01"></property>
+        <property name="car.price" value="900000"></property>
+    </bean>
+
+    <!--
+    實驗6：通過繼承實現bean配置信息的重用
+    實驗7：通過abstract屬性創建一個模板bean
+    實驗8：bean之間的依賴
+     -->
+
+    <!-- abstract="true"，這個bean的配置是一個抽像的，不能獲取他的實例，只能被別人用類繼承 -->
+    <bean id="person05" class="com.atsanstwy27.bean.Person" abstract="true">
+        <property name="lastName" value="鑫鑫"></property>
+        <property name="age" value="14"></property>
+        <property name="gender" value="女"></property>
+        <property name="email" value="8512@qq.com"></property>
+    </bean>
+
+    <!-- parent，指定當前bean的配置信息繼承於哪個 -->
+    <!-- 甚至可以省略class -->
+    <bean id="person06" class="com.atsanstwy27.bean.Person" parent="person05">
+        <property name="lastName" value="悅悅"></property>
+    </bean>
+
+    <!-- 原來是被配置的順序創建bean -->
+    <!-- 可以改變bean的順序 -->
+    <!--  實驗8：bean之間的依賴 （只是改變創建順序） -->
+    <bean id="person07" class="com.atsanstwy27.bean.Person"></bean>
+    <bean id="car07" class="com.atsanstwy27.bean.Car" depends-on="person07,book07"></bean>
+    <bean id="book07" class="com.atsanstwy27.bean.Book"></bean>
+
+    <!-- 實驗9：測試bean的作用域，分別創建單實例和多實例的bean * -->
+    <!-- bean的作用域：指定bean是否單實例，xxx；
+
+           不寫scope:默認是單實例的
+
+          prototype:多實例的
+              １容器啟動默認不會去創建多實例bean
+              ２獲取的時候創建這個bean
+              ３每一次獲取都會創建一個新的對象
+
+          singleton:單實例的（默認）
+              １在容器啟動完成之前就已經創建好對象，並保存在容器中。
+              ２任何時候獲取都是之前創建好的那個對象
+
+          request:在web環境下，同一次請求創建一個Bean實例（沒用）
+          session:在web環境下，同一次會話創建一個Bean實例（沒用）
+     -->
+    <bean id="book08" class="com.atsanstwy27.bean.Book" scope="prototype"></bean>
+
+</beans>

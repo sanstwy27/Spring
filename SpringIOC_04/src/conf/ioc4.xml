@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <!-- 實驗15：通過註解分別創建Dao、Service、Controller（控制器） ※
+    通過給bean上添加某些註解，可以快速的將bean加入到ioc容器中
+    MVC模式：M（model：模型，就是這些javabean）
+             V（view：視圖，就是這些jsp頁面）
+             C（controller：控制器，就是控制網站跳轉邏輯Servlet）
+
+        某個類上添加上任何一個註解都能快速的將這個組件加入到ioc容器的管理中：
+        Spring有四個註解：
+            @Controller:控制器：我們推薦給控制器層(servlet包下)的組件加這個註解
+            @Service:業務邏輯：我們推薦給業務邏輯層(service包下)的組件加這個註解
+            @Repository:給數據庫層(持久化層，dao層)的組件添加這個註解
+            @Component:給不屬於以上三層的組件加這個註解
+
+        註釋可以隨便加，Spring底層不會去驗證你的這個組件，
+        但仍應推薦各自加各自的註釋，這是給我們自己程序員看的。
+
+        使用註解將組件快速的加入到容器中需要步驟：
+        1）給要添加的組件上加所需要的註釋
+        2）告訴Spring，自動掃瞄了註解的組件，依賴context名稱空間
+        3）一定要導入aop包(支持註解模式)
+    -->
+
+    <!-- context:component-scan,自動組件掃瞄
+    base-package：指定掃瞄的基礎包，把基礎包及他下面所有的包的所有加了註解的類
+    自動的掃瞄進ioc容器中。
+     -->
+    <context:component-scan base-package="com.atsanstwy27">
+        <!--
+        context:exclude-filter：掃瞄的時候可以排除一些不要的組件
+
+        type="annotation"：指定排除規則：按照註解進行排除。標注了指定註解的組件不要
+        expression="org.springframework.stereotype.Controller"：註解的全類名
+
+        type="assignable":指定排除某個具體的類，按照類排除
+        expression="com.guigu.service.BookService"
+
+        （type="aspectj":後來aspectj表達式，不常用
+        （type="custom":自定義一個TypeFilter，自己寫代碼決定哪些使用，不常用
+        （type="regex":正則表達式，不常用
+
+        -->
+
+
+        <!--
+        context:include-filter:指定掃瞄進入哪些組件，默認都是全部掃瞄進來
+        同時需要改：
+        <context:component-scan base-package="com.guigu" use-default-filters="false">
+        一定要禁用上面這個默認的過濾規則才行
+
+        例子：<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+         -->
+    </context:component-scan>
+    <!-- 註解和bean配置相結合 -->
+
+    <!-- DI:依賴注入 -->
+    <!-- 實驗18：使用@Autowired註解實現根據類型實現自動裝配※ -->
+    <!-- 導包aop:支持註解 -->
+    <!-- 實驗19:如果資源類型的bean不止一個，
+    默認根據@Autowired註解標記的成員變量名作為id查找bean，進行裝配※ -->
+    <!-- 實驗20:如果根據成員變量名作為id還是找不到bean，
+    可以使用@Qualifier註解明確指定目標bean的id※ -->
+
+    <!-- @Autowired原理：
+        @Autowired
+        private BookService bookService;
+        1）先按照類型去容器中找到對應的組件：bookService=ioc.getBean(BookService.class);
+            １找到一個，那肯定直接賦值
+            ２沒找到，拋出異常
+            ３找到多個，會按照變量名作為id繼續匹配。
+                比如它會調用bookService 而不會調用 bookServiceExt
+
+                （1）如果按照id匹配不成功，可以用註解@Qualifier
+                因為如果有很多BookServlet去調用這個id不匹配的名字，一個一個改
+                肯定很麻煩。
+                @Qualifier:指定一個名作為id，讓spring別使用變量名作為id
+                    比如：	@Qualifier("bookService")
+
+    也就是說，Autowired標注的自動裝配的屬性默認是一定裝配上的，
+    找到就裝配，找不到就裝配null
+    需要設置：@Autowired(required=false)
+    否則不這麼寫不會裝配null，而是報錯
+     -->
+
+    <!-- @Autowired @Resource @Inject:都是用來自動裝配的註解
+
+    @Autowired:最強大，是Spring自己的註解
+    @Resource：J2ee，java的標準
+    @Inject：EJB
+
+    @Autowired 和 @Resource 的區別：
+    @Resource的擴展性更強，@Autowired離開Spring就不行
+    如果切換成另外一個容器框架，顯然@Resource還可以使用。
+     -->
+
+</beans>

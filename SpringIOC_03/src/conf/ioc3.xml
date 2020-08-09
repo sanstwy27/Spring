@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+    <!-- 實驗5，配置通過靜態工廠方法創建的bean，實例工廠方法創建的bean * -->
+    <!-- bean的創建  默認就是框架利用反射new出來的bean實例 -->
+    <!-- 工廠模式：工廠幫我們創建對像; 有一個專門幫我們創建對象的類，這個類就叫做工廠
+        AirPlane ap=AirPlaneFactory.getAirPlane(String jzName);
+
+        靜態工廠：工廠本身不用創建對像；通過靜態方法調用，對像=工廠類.工廠方法名();
+        實例工廠：工廠本身需要創建對像；
+                    工廠類 對像=new 工廠類();
+                    工廠對像.getAirPlane("張三");
+
+     -->
+    <!-- 1.靜態工廠（不需要創建工廠本身）
+    factory-method="getAirPlane"，指定哪個方法是工廠方法
+    class:指定靜態工廠全類名
+    -->
+    <bean id="airPlane01" class="com.atsanstwy27.factory.AirPlaneStaticFactory"
+          factory-method="getAirPlane">
+        <!-- 可以為方法指定參數 -->
+        <constructor-arg value="老四"></constructor-arg>
+    </bean>
+
+    <!-- 2.實例工廠 -->
+    <bean id="airPlaneInstanceFactory"
+          class="com.atsanstwy27.factory.AirPlaneInstanceFactory"></bean>
+
+    <!-- factory-bean,指定當前對像創建使用哪個工廠
+          1.先配置出實例工廠對像
+          2.配置我們要創建的AirPlane使用哪個工廠創建
+                  （1）factory-bean，指定使用哪個工廠實例
+                  （2）factory-method，使用哪個工廠方法
+    -->
+    <bean id="airPlane02" class="com.atsanstwy27.bean.AirPlane"
+          factory-bean="airPlaneInstanceFactory" factory-method="getAirPlane">
+        <constructor-arg value="張五"></constructor-arg>
+    </bean>
+
+</beans>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+    <!-- 包掃瞄 -->
+    <context:component-scan base-package="com.atsanstwy27"></context:component-scan>
+    <!-- 0. 引入外部文件 -->
+    <context:property-placeholder location="classpath:conf/dbconfig.properties"/>
+
+    <!-- 1. 配置數據源 -->
+    <bean id="pooledDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="user" value="${jdbc.user}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+        <property name="driverClass" value="${jdbc.driverClass}"></property>
+    </bean>
+
+    <!-- 2. 配置JdbcTemplate -->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" >
+        <constructor-arg name="dataSource" value="#{pooledDataSource}"></constructor-arg>
+    </bean>
+
+
+    <!-- 基於xml配置的事務 ，依賴tx名稱空間和AOP名稱空間-->
+    <!-- 事務控制 -->
+    <!-- 1.配置事務管理器(切面）讓其進行事務控制 ，一定導入有關切面的包-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!-- 控制數據源 -->
+        <property name="dataSource" ref="pooledDataSource"></property>
+    </bean>
+
+    <!-- 2.配置出事務方法-->
+    <!-- 3.告訴Spring哪些是事務方法 (事務按照切入點表達式切入事務方法)
+    -->
+    <bean id="bookService" class="com.atsanstwy27.service.BookService"> </bean>
+    <aop:config>
+        <aop:pointcut expression="execution(* com.atsanstwy27.ser*.*.*(..))" id="txPoint"></aop:pointcut>
+        <!-- 事務建議，事務增強  advice-ref:指向事務管理器的配置-->
+        <aop:advisor advice-ref="myAdivce" pointcut-ref="txPoint"></aop:advisor>
+    </aop:config>
+
+    <!-- 配置事務管理器:
+          transaction-manager:指定是配置哪個事務管理器
+    -->
+    <tx:advice id="myAdivce" transaction-manager="transactionManager">
+        <!-- 事務屬性 -->
+        <tx:attributes>
+            <!-- 指明哪些方法是事務方法：切入點只是說，事務管理器要切入這些方法，哪些方法要加事務使用tx:method說明 -->
+            <tx:method name="*"/>
+            <tx:method name="checkout" propagation="REQUIRED" timeout="-1"/>
+            <tx:method name="get*" read-only="true"/>
+        </tx:attributes>
+
+    </tx:advice>
+
+</beans>

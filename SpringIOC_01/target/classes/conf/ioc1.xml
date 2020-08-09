@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 註冊一個Person對象，Spring會自動創建這個Person對像 -->
+    <!--
+    一個Bean標籤可以註冊一個組件（對像、類）
+    class,寫要註冊的組件的全類名
+    id,這個對象的唯一標識
+    -->
+    <bean id="person01" class="com.atsanstwy27.bean.Person">
+        <!-- 使用property標籤為Person對象的屬性賦值
+             name="lastName"，指定屬性名
+             value="張三"，為這個屬性賦值
+        -->
+        <property name="lastName" value="張三"></property>
+        <property name="age" value="18"></property>
+        <property name="email" value="zhangsan@qq.com"></property>
+        <property name="gender" value="男"></property>
+    </bean>
+
+    <bean id="person02" class="com.atsanstwy27.bean.Person">
+        <property name="lastName" value="小花"></property>
+    </bean>
+
+    <bean id="person03" class="com.atsanstwy27.bean.Person">
+        <!-- 調用有參構造器進行創建對象並賦值 -->
+        <constructor-arg name="lastName" value="小明"></constructor-arg>
+        <constructor-arg name="age" value="17"></constructor-arg>
+        <constructor-arg name="email" value="4887845@qq.com"></constructor-arg>
+        <constructor-arg name="gender" value="男"></constructor-arg>
+    </bean>
+
+    <bean id="person04" class="com.atsanstwy27.bean.Person">
+        <!-- 如果省略name屬性，需要嚴格按照構造器參數的位置指定 -->
+        <!-- 也可以打亂順序，用index為參數指定索引，從0開始 -->
+        <!-- public Person(String lastName, Integer age, String gender, String email) -->
+        <constructor-arg value="大衛" index="0"></constructor-arg>
+        <constructor-arg value="18" index="1"></constructor-arg>
+        <constructor-arg value="4564@qq.com" index="3"></constructor-arg>
+        <constructor-arg value="男" index="2"></constructor-arg>
+    </bean>
+
+    <bean id="person05" class="com.atsanstwy27.bean.Person">
+        <!-- 重載的情況下type可以指定參數的類型 -->
+        <!-- public Person(String lastName, Integer age, String gender) -->
+        <!-- public Person(String lastName, String email, String gender) -->
+        <constructor-arg value="老王"></constructor-arg>
+        <constructor-arg value="18" index="1" type="java.lang.Integer"></constructor-arg>
+        <constructor-arg value="男"></constructor-arg>
+    </bean>
+
+    <!-- 顯然以上所有賦值辦法中，person01的辦法可以免去之後所有問題 -->
+
+    <!-- 通過p名稱空間為bean賦值，導入p名稱空間 -->
+    <!-- 名稱空間，在xml中名稱空間是用來防止標籤重複的 -->
+    <!--
+        <book>
+            <b:name>西遊記</b:name>
+            <price>19.98</price>
+            <author>
+                <a:name>吳承恩</a:name>
+                <gender>男</gender>
+            </author>
+        </book>
+
+        帶前綴的標籤<c:forEach>  <jsp:forward>
+     -->
+    <bean id="person06" class="com.atsanstwy27.bean.Person"
+          p:age="18" p:email="xiaoming@qq.com"
+          p:lastName="哈哈" p:gender="男">
+    </bean>
+
+</beans>

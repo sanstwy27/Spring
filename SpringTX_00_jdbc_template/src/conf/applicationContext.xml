@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+    <context:component-scan base-package="com.atsanstwy27.dao"></context:component-scan>
+
+    <!--0、引入外部配置文件  -->
+    <context:property-placeholder location="classpath:conf/dbconfig.properties"/>
+    <!--1、整合數據源-->
+    <bean id="dataSoure" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="user" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+        <property name="jdbcUrl" value="${jdbc.url}"></property>
+        <property name="driverClass" value="${jdbc.driverclass}"></property>
+
+        <property name="acquireIncrement" value="2"></property>
+        <property name="initialPoolSize" value="5"></property>
+    </bean>
+
+    <!--2、配置一個JdbcTempalte，以後使用直接獲取  -->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <!-- 告訴jdbcTemplate從哪裡獲取連接 -->
+        <!-- 注入數據庫連接池 -->
+        <!-- <property name="dataSource" ref="dataSoure"></property> -->
+        <constructor-arg ref="dataSoure"></constructor-arg>
+    </bean>
+
+    <!--3、配置一個支持具名參數功能的NamedParameterJdbcTemplate  -->
+    <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+        <constructor-arg ref="dataSoure"></constructor-arg>
+    </bean>
+
+</beans>
